@@ -10,7 +10,11 @@ def foreach_plugin(plugins, method_name, *args):
     """Have each plugin run the method with the given name and arguments."""
     for plugin in plugins:
         if hasattr(plugin, method_name):
-            getattr(plugin, method_name)(*args)
+            try:
+                getattr(plugin, method_name)(*args)
+            except Exception as e:
+                print(e)
+                pass
         else:
             raise ValueError(
                 (
@@ -71,6 +75,8 @@ class PowerProxyPlugin:
 class TokenCountingPlugin(PowerProxyPlugin):
     """A plugin which counts tokens."""
 
+    model_type = None
+    deployment_name = None
     prompt_tokens = None
     streaming_prompt_tokens = None
     completion_tokens = None
@@ -81,6 +87,8 @@ class TokenCountingPlugin(PowerProxyPlugin):
         """Run when a new request is received."""
         super().on_new_request_received(routing_slip)
 
+        self.model_type = '/'.join(routing_slip['incoming_request']['path_params']['path'].split('/')[3:])
+        self.deployment_name = routing_slip['incoming_request']['path_params']['path'].split('/')[2]
         self.prompt_tokens = None
         self.completion_tokens = None
         self.streaming_prompt_tokens = None
@@ -91,10 +99,11 @@ class TokenCountingPlugin(PowerProxyPlugin):
         """Run when the body was received from AOAI (only for one-time, non-streaming requests)."""
         super().on_body_dict_from_target_available(routing_slip)
 
-        usage = routing_slip["body_dict_from_target"]["usage"]
-        self.completion_tokens = usage["completion_tokens"]
-        self.prompt_tokens = usage["prompt_tokens"]
-        self.total_tokens = usage["total_tokens"]
+        usage = routing_slip["body_dict_from_target"].get("usage")
+        if usage:
+            self.completion_tokens = usage.get("completion_tokens", 0)
+            self.prompt_tokens = usage["prompt_tokens"]
+            self.total_tokens = usage["total_tokens"]
 
         self.on_token_counts_for_request_available(routing_slip)
 

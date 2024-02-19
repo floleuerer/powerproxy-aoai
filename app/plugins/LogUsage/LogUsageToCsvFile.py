@@ -17,6 +17,8 @@ class LogUsageToCsvFile(LogUsageBase):
         "request_received_utc",
         "client",
         "is_streaming",
+        "model_type",
+        "deployment_name",
         "prompt_tokens",
         "completion_tokens",
         "total_tokens",
@@ -47,6 +49,8 @@ class LogUsageToCsvFile(LogUsageBase):
         request_received_utc,
         client,
         is_streaming,
+        model_type,
+        deployment_name,
         prompt_tokens,
         completion_tokens,
         total_tokens,
@@ -61,6 +65,8 @@ class LogUsageToCsvFile(LogUsageBase):
                 f"{request_received_utc},"
                 f"{client},"
                 f"{1 if is_streaming else 0},"
+                f"{model_type},"
+                f"{deployment_name},"
                 f"{prompt_tokens},"
                 f"{completion_tokens},"
                 f"{total_tokens},"
