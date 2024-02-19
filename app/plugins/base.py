@@ -76,7 +76,6 @@ class TokenCountingPlugin(PowerProxyPlugin):
     """A plugin which counts tokens."""
 
     model_type = None
-    deployment_name = None
     prompt_tokens = None
     streaming_prompt_tokens = None
     completion_tokens = None
@@ -88,7 +87,6 @@ class TokenCountingPlugin(PowerProxyPlugin):
         super().on_new_request_received(routing_slip)
 
         self.model_type = '/'.join(routing_slip['incoming_request']['path_params']['path'].split('/')[3:])
-        self.deployment_name = routing_slip['incoming_request']['path_params']['path'].split('/')[2]
         self.prompt_tokens = None
         self.completion_tokens = None
         self.streaming_prompt_tokens = None

@@ -12,13 +12,13 @@ class LogUsageToConsole(LogUsageBase):
         client,
         is_streaming,
         model_type,
-        deployment_name,
         prompt_tokens,
         completion_tokens,
         total_tokens,
         aoai_roundtrip_time_ms,
         aoai_region,
         aoai_endpoint_name,
+        aoai_deployment_name
     ):
         """Append a new line with the given infos."""
         print(
@@ -33,5 +33,5 @@ class LogUsageToConsole(LogUsageBase):
             f"Azure OpenAI Roundtrip Time   : {aoai_roundtrip_time_ms} ms\n"
             f"Azure OpenAI Region           : {aoai_region}\n"
             f"Azure OpenAI Endpoint Name    : {aoai_endpoint_name}\n"
-            f"Azure OpenAI Deployment Name  : {deployment_name}\n"
+            f"Azure OpenAI Deployment Name  : {aoai_deployment_name}\n"
         )

@@ -97,12 +97,14 @@ class LogUsageToLogAnalytics(LogUsageBase):
         request_received_utc,
         client,
         is_streaming,
+        model_type,
         prompt_tokens,
         completion_tokens,
         total_tokens,
         aoai_roundtrip_time_ms,
         aoai_region,
         aoai_endpoint_name,
+        aoai_deployment_name
     ):
         """Append a new line with the given infos."""
         # pylint: disable=no-value-for-parameter
@@ -114,12 +116,14 @@ class LogUsageToLogAnalytics(LogUsageBase):
                     "Client": client,
                     "RequestReceivedUtc": f"{request_received_utc}",
                     "IsStreaming": is_streaming,
+                    "ModelType": model_type,
                     "PromptTokens": prompt_tokens,
                     "CompletionTokens": completion_tokens,
                     "TotalTokens": total_tokens,
                     "AoaiRoundtripTimeMS": aoai_roundtrip_time_ms,
                     "AoaiRegion": aoai_region,
                     "AoaiEndpointName": aoai_endpoint_name,
+                    "AoaiDeploymentName": aoai_deployment_name
                 }
             ],
         )

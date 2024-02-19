@@ -18,13 +18,13 @@ class LogUsageToCsvFile(LogUsageBase):
         "client",
         "is_streaming",
         "model_type",
-        "deployment_name",
         "prompt_tokens",
         "completion_tokens",
         "total_tokens",
         "aoai_roundtrip_time_ms",
         "aoai_region",
         "aoai_endpoint_name",
+        "aoai_deployment_name"
     ]
 
     def on_plugin_instantiated(self):
@@ -50,13 +50,13 @@ class LogUsageToCsvFile(LogUsageBase):
         client,
         is_streaming,
         model_type,
-        deployment_name,
         prompt_tokens,
         completion_tokens,
         total_tokens,
         aoai_roundtrip_time_ms,
         aoai_region,
         aoai_endpoint_name,
+        aoai_deployment_name
     ):
         """Append a new line with the given infos."""
         with open(self.log_file_path, "a", encoding="utf-8") as log_file:
@@ -66,11 +66,11 @@ class LogUsageToCsvFile(LogUsageBase):
                 f"{client},"
                 f"{1 if is_streaming else 0},"
                 f"{model_type},"
-                f"{deployment_name},"
                 f"{prompt_tokens},"
                 f"{completion_tokens},"
                 f"{total_tokens},"
                 f"{aoai_roundtrip_time_ms},"
                 f"{aoai_region},"
-                f"{aoai_endpoint_name}"
+                f"{aoai_endpoint_name},"
+                f"{aoai_deployment_name}"
             )

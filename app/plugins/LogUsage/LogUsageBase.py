@@ -34,13 +34,13 @@ class LogUsageBase(TokenCountingPlugin):
             client=routing_slip["client"],
             is_streaming=False,
             model_type=self.model_type,
-            deployment_name=self.deployment_name,
             prompt_tokens=self.prompt_tokens,
             completion_tokens=self.completion_tokens,
             total_tokens=self.total_tokens,
             aoai_roundtrip_time_ms=routing_slip["aoai_roundtrip_time_ms"],
             aoai_region=self.aoai_region,
             aoai_endpoint_name=routing_slip["aoai_endpoint_name"],
+            aoai_deployment_name=routing_slip["aoai_deployment_name"]
         )
 
     def on_end_of_target_response_stream_reached(self, routing_slip):
@@ -52,13 +52,13 @@ class LogUsageBase(TokenCountingPlugin):
             client=routing_slip["client"],
             is_streaming=True,
             model_type=self.model_type,
-            deployment_name=self.deployment_name,
             prompt_tokens=self.prompt_tokens,
             completion_tokens=self.completion_tokens,
             total_tokens=self.total_tokens,
             aoai_roundtrip_time_ms=routing_slip["aoai_roundtrip_time_ms"],
             aoai_region=self.aoai_region,
             aoai_endpoint_name=routing_slip["aoai_endpoint_name"],
+            aoai_deployment_name=routing_slip["aoai_deployment_name"]
         )
 
     @abstractmethod
@@ -68,12 +68,12 @@ class LogUsageBase(TokenCountingPlugin):
         client,
         is_streaming,
         model_type,
-        deployment_name,
         prompt_tokens,
         completion_tokens,
         total_tokens,
         aoai_roundtrip_time_ms,
         aoai_region,
         aoai_endpoint_name,
+        aoai_deployment_name
     ):
         pass

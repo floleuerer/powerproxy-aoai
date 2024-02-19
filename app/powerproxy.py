@@ -89,23 +89,43 @@ async def lifespan(app: FastAPI):
             }
         }
     else:
-        app.state.aoai_endpoints = {
-            endpoint["name"]: {
-                "url": endpoint["url"],
-                "key": endpoint["key"],
-                "client": httpx.AsyncClient(base_url=endpoint["url"]),
-                "next_request_not_before_timestamp_ms": 0,
-                "non_streaming_fraction": float(endpoint["non_streaming_fraction"]),
-            }
-            for endpoint in config["aoai/endpoints"]
-        }
-    if len(app.state.aoai_endpoints) == 0:
-        raise ValueError(
-            (
-                "Missing endpoints for Azure OpenAI. Ensure that at least one endpoint for Azure "
-                "OpenAI or a mock response is configured in PowerProxy's configuration."
+        if len(config["aoai/endpoints"]) == 0:
+            raise ValueError(
+                (
+                    "Missing endpoints for Azure OpenAI. Ensure that at least one endpoint for Azure "
+                    "OpenAI or a mock response is configured in PowerProxy's configuration."
+                )
             )
-        )
+        if config["aoai/endpoints"][0].get('deployments') is not None:
+            deployment_map = {}
+            app.state.use_aoai_deployment_map = True
+            for endpoint in config["aoai/endpoints"]:
+                for deployment in endpoint['deployments']:
+                    deployment_name = deployment['name']
+                    if deployment['name'] not in deployment_map.keys():
+                        deployment_map[deployment_name] = {}
+                    deployment_map[deployment_name][endpoint['name']] = {
+                                "url": endpoint["url"],
+                                "key": endpoint["key"],
+                                "client": httpx.AsyncClient(base_url=endpoint["url"]),
+                                "next_request_not_before_timestamp_ms": 0,
+                                "non_streaming_fraction": float(endpoint["non_streaming_fraction"]),
+                            }
+            app.state.aoai_deployment_map = deployment_map
+            print(json.dumps(deployment_map, indent=4, default=str))
+
+        else:
+            app.state.use_aoai_deployment_map = False
+            app.state.aoai_endpoints = {
+                endpoint["name"]: {
+                    "url": endpoint["url"],
+                    "key": endpoint["key"],
+                    "client": httpx.AsyncClient(base_url=endpoint["url"]),
+                    "next_request_not_before_timestamp_ms": 0,
+                    "non_streaming_fraction": float(endpoint["non_streaming_fraction"]),
+                }
+                for endpoint in config["aoai/endpoints"]
+            }
 
     # print serve notification
     print()
@@ -201,10 +221,25 @@ async def handle_request(request: Request, path: str):
     if client:
         foreach_plugin(config.plugins, "on_client_identified", routing_slip)
 
+    aoai_deployment_name = routing_slip["incoming_request"]["path_params"]["path"].split("/")[2]
+    if app.state.use_aoai_deployment_map:
+        try:
+            aoai_endpoints = app.state.aoai_deployment_map[aoai_deployment_name]
+        except KeyError:
+            raise ImmediateResponseException(
+                Response(
+                    content=f"No PowerProxy configuration for deployment "
+                            f"{aoai_deployment_name} found!",
+                    status_code=status.HTTP_404_NOT_FOUND,
+                )
+            )
+    else:
+        aoai_endpoints = app.state.aoai_endpoints
+
     # get response from AOAI by iterating through the configured endpoints
     aoai_response: httpx.Response = None
-    for aoai_endpoint_name in app.state.aoai_endpoints:
-        aoai_endpoint = app.state.aoai_endpoints[aoai_endpoint_name]
+    for aoai_endpoint_name in aoai_endpoints:
+        aoai_endpoint = aoai_endpoints[aoai_endpoint_name]
 
         # try next endpoint if this endpoint is blocked
         if aoai_endpoint["next_request_not_before_timestamp_ms"] > get_current_timestamp_in_ms():
@@ -228,6 +263,7 @@ async def handle_request(request: Request, path: str):
         # remember endpoint and request start time
         routing_slip["aoai_endpoint_name"] = aoai_endpoint_name
         routing_slip["aoai_request_start_time"] = get_current_timestamp_in_ms()
+        routing_slip["aoai_deployment_name"] = aoai_deployment_name
 
         # send request
         new_timeout = httpx.Timeout(timeout=5.0)

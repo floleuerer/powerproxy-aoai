@@ -60,6 +60,10 @@ aoai:
       # 0.7 = endpoint will handle 70% of the non-streaming requests it gets
       # 1   = endpoint will handle all non-streaming request it gets
       non_streaming_fraction: 1
+      # optional: specify a list of deployments availabe on this endpoint
+      #deployments:
+      #- name: gpt-35-turbo
+      #- name: gpt-4-vision-preview
 
     - name: Another Endpoint
       url: https://___.openai.azure.com/
@@ -70,6 +74,9 @@ aoai:
       # 0.7 = endpoint will handle 70% of the non-streaming requests it gets
       # 1   = endpoint will handle all non-streaming request it gets
       non_streaming_fraction: 1
+      # optional: specify a list of deployments availabe on this endpoint
+      #deployments:
+      #- name: gpt-35-turbo
 
   # # alternatively, specify a mock response to be used instead of the real response from
   # # Azure OpenAI
