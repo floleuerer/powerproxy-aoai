@@ -30,6 +30,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--config-file",
     type=str,
+    default='config/config.local.yaml',
     help="Path to config file",
 )
 # --config-env-var
