@@ -18,6 +18,7 @@ RUN python -m pip install -r requirements.txt
 # set workdir and copy app to image
 WORKDIR /app
 COPY ./app /app
+COPY ./config /app/config
 
 # create a non-root user with an explicit UID and adds permission to access the /app folder.
 RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app && mkdir /logs && chown appuser /logs
@@ -33,4 +34,4 @@ ENTRYPOINT uvicorn powerproxy:app \
     --no-date-header \
     --timeout-keep-alive 120 \
     --timeout-graceful-shutdown 120 \
-    --workers 4
+    --workers 4 
